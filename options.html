@@ -26,6 +26,16 @@
       font-size: 0.9em;
       color: #555;
     }
+    .action-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1em;
+    }
+    #manualUpdateFeedback {
+      text-align: center;
+      font-weight: bold;
+    }
+
   </style>
 </head>
 <body>
@@ -51,7 +61,13 @@
     <strong>Last Updated:</strong> <span id="lastUpdated">Unknown</span>
   </div>
 
-  <button id="save">Save Changes</button>
+  <div class="action-buttons">
+    <button id="save">Save Changes</button>
+    <button id="generate-now">Generate URI Now</button>
+  </div>
+
+  <div id="manualUpdateFeedback">
+  </div>
 
   <script src="options.js"></script>
 </body>
