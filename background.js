@@ -1,23 +1,19 @@
 const PROXY_LIST_URL = "";
-const DEFAULT_CONFIG = {
-  desired_name: ""
-};
-const DEFAULT_DOMAINS = [
-  "whatismyipaddress.com"
-];
+const DEFAULT_CONFIG = { desired_name: "" };
+const DEFAULT_DOMAINS = ["whatismyipaddress.com"];
 
-// Fetch config from storage or use defaults
 async function getConfig() {
-  const stored = await browser.storage.local.get(["desired_name", "domains"]);
+  const stored = await browser.storage.local.get(["desired_name", "domains", "auto_mode"]);
   return {
     desired_name: stored.desired_name || DEFAULT_CONFIG.desired_name,
-    domains: stored.domains || DEFAULT_DOMAINS
+    domains: stored.domains || DEFAULT_DOMAINS,
+    auto_mode: stored.auto_mode !== false // defaults to true
   };
 }
 
 async function fetchProxyList() {
   const res = await fetch(PROXY_LIST_URL);
-  if (!res.ok) throw new Error("Failed to fetch proxy list: ${res.status} ${res.statusText}");
+  if (!res.ok) throw new Error(`Failed to fetch proxy list: ${res.status} ${res.statusText}`);
   return await res.json();
 }
 
@@ -38,44 +34,68 @@ async function updatePAC() {
     const { desired_name, domains } = await getConfig();
     const proxyList = await fetchProxyList();
     const proxy = proxyList.find(p => p.name === desired_name);
-
     if (!proxy) throw new Error(`Proxy named '${desired_name}' not found`);
-
     const pacScript = generatePAC(proxy, domains);
     const pacDataURI = "data:," + encodeURIComponent(pacScript);
-
-    await applyPAC(pacDataURI);
-
-    async function applyPAC(pacDataURI) {
-      await browser.proxy.settings.set({
-        value: {
-          proxyType: "autoConfig",
-          autoConfigUrl: pacDataURI
-        },
+    await browser.proxy.settings.set({
+      value: {
+        proxyType: "autoConfig",
+        autoConfigUrl: pacDataURI
+      },
       scope: "regular" // Ensures it applies at the right level (non-incognito)
-      });
-    }
+    });
 
-    console.log("PAC updated successfully.");                   // For prod
-    console.log("PAC updated successfully: ", pacDataURI);      // For debug only
-    console.log("PAC script (human-readable):\n", pacScript);   // For debug only
+    const now = new Date().toLocaleString();
+    await browser.storage.local.set({ last_updated: now });
+
+    console.log("PAC updated successfully at", now);
+    console.log("PAC script (machine readable):\n", pacDataURI);      // For debug only
+    console.log("PAC script (human-readable):\n", pacScript);         // For debug only
 
   } catch (err) {
     console.error("PAC update failed:", err);
   }
 }
 
+async function setupAlarmBasedOnAutoMode() {
+  const { auto_mode } = await getConfig();
+  await browser.alarms.clearAll();
+  if (auto_mode) {
+    browser.alarms.create("auto-pac", { periodInMinutes: 30 });
+  }
+}
+
 // Manual trigger
 browser.browserAction.onClicked.addListener(updatePAC);
 
-// Periodic updates
-browser.alarms.create("auto-pac", { periodInMinutes: 30 });
+// Handle periodic update
 browser.alarms.onAlarm.addListener(alarm => {
   if (alarm.name === "auto-pac") {
-    console.log("Ding! 30 minutes have passed. Updating.");
+    console.log("Ding! 30 minutes have passed. Updating PAC.");
     updatePAC();
   }
 });
 
-// Immediate update on browser startup or installation, or enabling
-updatePAC();
+// Initial setup (Installation, browser startup or enabling)
+(async function initializeExtension () {
+  await updatePAC();
+  await setupAlarmBasedOnAutoMode();
+})();
+
+// Create the "Options" menu when right-clicking on the Toolbar Icon.
+browser.menus.create({
+    title: "Options",
+    contexts: ["browser_action"],
+    onclick: function () {
+        browser.runtime.openOptionsPage();
+    },
+});
+
+// Creating listener to react immediately to Automatic mode toggle (after saving changes)
+// Needed to not having to relaunch browser after a change
+browser.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && changes.auto_mode) {
+    console.log("Automatic mode (auto_mode) changed, reconfiguring alarms...");
+    setupAlarmBasedOnAutoMode();
+  }
+});

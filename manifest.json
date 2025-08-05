@@ -1,12 +1,13 @@
 {
   "manifest_version": 2,
   "name": "Auto PAC Proxy",
-  "version": "0.7",
+  "version": "0.8",
   "description": "Fetches a proxy by name and sets a PAC script via data URI for specific domains, updating every 30 minutes.",
   "permissions": [
     "proxy",
     "alarms",
     "storage",
+    "menus",
     "*://*/*"
   ],
   "background": {
@@ -17,6 +18,10 @@
       "48": "icons/icon-48.png"
     },
     "default_title": "Refresh PAC manually"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
   },
   "icons": {
     "48": "icons/icon-48.png"

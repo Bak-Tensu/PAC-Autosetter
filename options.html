@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auto PAC Proxy – Options</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 500px;
+      margin: 2em auto;
+      padding: 1em;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    label {
+      display: block;
+      margin-top: 1em;
+    }
+    input[type="text"], textarea {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    #status {
+      margin-top: 1em;
+      font-size: 0.9em;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>Auto PAC Proxy Settings</h1>
+
+  <label>
+    Desired Proxy Name:
+    <input type="text" id="proxyName" />
+  </label>
+
+  <label>
+    Domains to Proxy (one per line):
+    <textarea id="domains" rows="6"></textarea>
+  </label>
+
+  <label>
+    <input type="checkbox" id="autoMode" />
+    Automatic Mode (refresh every 30 minutes)
+  </label>
+
+  <div id="status">
+    <strong>Status:</strong> <span id="currentStatus">Loading...</span><br>
+    <strong>Last Updated:</strong> <span id="lastUpdated">Unknown</span>
+  </div>
+
+  <button id="save">Save Changes</button>
+
+  <script src="options.js"></script>
+</body>
+</html>
