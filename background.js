@@ -71,8 +71,8 @@ browser.browserAction.onClicked.addListener(updatePAC);
 // Handle periodic update
 browser.alarms.onAlarm.addListener(alarm => {
   if (alarm.name === "auto-pac") {
-    console.log("Ding! 30 minutes have passed. Updating PAC in 5 seconds.");
-    setTimeout(updatePAC, 5000); // Short delay so that it does not immediately fails after waking up from sleep.
+    console.log("Ding! 30 minutes have passed. Updating PAC in 10 seconds.");
+    setTimeout(updatePAC, 10000); // Short delay so that it does not immediately fails after waking up from sleep.
   }
 });
 
