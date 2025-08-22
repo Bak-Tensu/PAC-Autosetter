@@ -31,6 +31,21 @@
       justify-content: space-between;
       margin-top: 1em;
     }
+    .impexp-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    #btn-import {
+      background-color: darkgreen;
+      color: white;
+      border-radius: 4px;
+    }
+    #btn-export {
+      background-color: darkred;
+      color: white;
+      border-radius: 4px;
+    }
     #manualUpdateFeedback {
       text-align: center;
       font-weight: bold;
@@ -39,7 +54,17 @@
   </style>
 </head>
 <body>
-  <h1>Auto PAC Proxy Settings</h1>
+  <h1>Auto PAC Proxy Settings </h1>
+
+  <div class="impexp-buttons">
+    <button id="btn-export">Export Settings</button>
+    <button id="btn-import">Import Settings</button>
+  </div>
+
+  <label>
+    Proxy List URL:
+    <input type="text" id="proxListURL" />
+  </label>
 
   <label>
     Desired Proxy Name:
