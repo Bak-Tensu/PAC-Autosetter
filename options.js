@@ -4,13 +4,15 @@ document.getElementById("generate-now").addEventListener("click", generatePACInO
 
 // Retrieve config from storage, or assign defaults if not found
 async function restoreOptions() {
-  const { desired_name, domains, auto_mode, last_updated } = await browser.storage.local.get([
+  const { desired_name, domains, auto_mode, last_updated, proxy_list } = await browser.storage.local.get([
     "desired_name",
     "domains",
     "auto_mode",
-    "last_updated"
+    "last_updated",
+    "proxy_list"
   ]);
 
+  document.getElementById("proxListURL").value = proxy_list || "";
   document.getElementById("proxyName").value = desired_name || "";
   document.getElementById("domains").value = (domains || ["whatismyipaddress.com"]).join("\n");
   document.getElementById("autoMode").checked = auto_mode !== false;
@@ -24,11 +26,13 @@ async function saveOptions() {
   const desired_name = document.getElementById("proxyName").value.trim();
   const domains = document.getElementById("domains").value.split("\n").map(d => d.trim()).filter(Boolean);
   const auto_mode = document.getElementById("autoMode").checked;
+  const proxy_list = document.getElementById("proxListURL").value.trim();
 
   await browser.storage.local.set({
     desired_name,
     domains,
-    auto_mode
+    auto_mode,
+    proxy_list
   });
 
   document.getElementById("currentStatus").textContent = auto_mode ? "Automatic" : "Manual";
@@ -45,7 +49,8 @@ async function generatePACInOptions() {
   console.log("Manual update launched from options.")
 
   try {
-    await browser.runtime.getBackgroundPage().then(bg => bg.updatePAC());
+    const bg = await browser.runtime.getBackgroundPage();
+    await bg.updatePAC(); // Separated so that if this throws, it will be caught here
     statusDiv.textContent = "PAC updated successfully!";
     statusDiv.style.color = "green";
   } catch (err) {
