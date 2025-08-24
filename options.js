@@ -2,6 +2,10 @@ document.addEventListener("DOMContentLoaded", restoreOptions);
 document.getElementById("save").addEventListener("click", saveOptions);
 document.getElementById("generate-now").addEventListener("click", generatePACInOptions);
 document.getElementById("btn-export").addEventListener("click", exportOptions);
+document.getElementById("btn-import").addEventListener("click", () => {
+  document.getElementById("file-import").click();
+});
+document.getElementById("file-import").addEventListener("change", importOptions);
 
 // Retrieve config from storage, or assign defaults if not found
 async function restoreOptions() {
@@ -104,3 +108,35 @@ async function exportOptions() {
   }
 }
 
+// Import config from a local file
+async function importOptions(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // Check JSON version
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+
+    if (data.version !== 1) {
+      alert("Unsupported config version: " + data.version);
+      return;
+    }
+
+    // Import config found in the JSON into browser storage
+    const { desired_name, domains, auto_mode, proxy_list } = data;
+
+    await browser.storage.local.set({
+      desired_name,
+      domains,
+      auto_mode,
+      proxy_list
+    });
+
+    alert("Settings imported successfully!");
+    location.reload(); // Reload to refresh the UI
+  } catch (err) {
+    console.error("Failed to import settings:", err);
+    alert("Import failed: invalid file format.");
+  }
+}
