@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Auto PAC Proxy",
-  "version": "1.1.0",
+  "version": "1.0.0",
   "description": "Fetches a proxy by name and sets a PAC script via data URI for specific domains, updating every 30 minutes.",
   "permissions": [
     "proxy",
