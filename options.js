@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", restoreOptions);
 document.getElementById("save").addEventListener("click", saveOptions);
 document.getElementById("generate-now").addEventListener("click", generatePACInOptions);
+document.getElementById("btn-export").addEventListener("click", exportOptions);
 
 // Retrieve config from storage, or assign defaults if not found
 async function restoreOptions() {
@@ -66,3 +67,40 @@ async function generatePACInOptions() {
     location.reload();
   }, 5000);
 };
+
+// Export config in a local file
+async function exportOptions() {
+  try {
+    // Grab everything we care about
+    const { desired_name, domains, auto_mode, proxy_list } = await browser.storage.local.get([
+      "desired_name", "domains", "auto_mode", "proxy_list"
+    ]);
+
+    // Build the export object with versioning
+    const exportData = {
+      version: 1,
+      desired_name: desired_name || "",
+      domains: domains || [],
+      auto_mode: auto_mode !== false,
+      proxy_list: proxy_list || ""
+    };
+
+    // Convert to pretty JSON
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    // Trigger download
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "PAC-extension-config.json"; // Rename as you like
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error("Export failed:", err);
+    alert("Failed to export settings. See console for details.");
+  }
+}
+
