@@ -18,11 +18,14 @@ async function fetchProxyList(proxy_list) {
   return await res.json();
 }
 
+// Note : Testing strict mode only for now. Find another solution to implement strict and loose modes later.
 function generatePAC(proxy, domains) {
   return `function FindProxyForURL(url, host) {
     const domains = ${JSON.stringify(domains)};
     for (let i = 0; i < domains.length; i++) {
-      if (host === domains[i] || host.endsWith("." + domains[i])) {
+      // Testing strict mode
+      // if (host === domains[i] || host.endsWith("." + domains[i])) {
+      if (host === domains[i]) {
         return "PROXY ${proxy.host}:${proxy.port}";
       }
     }
