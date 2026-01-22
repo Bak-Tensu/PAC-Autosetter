@@ -37,7 +37,7 @@ function generatePAC(proxy, domains) {
     const domains = ${JSON.stringify(domains)};
     for (let i = 0; i < domains.length; i++) {
       if (host === domains[i] || host.endsWith("." + domains[i])) {
-        return "PROXY ${proxy.host}:${proxy.port}";
+        return "SOCKS5 ${proxy.host}:${proxy.port}";
       }
     }
     return "DIRECT";
