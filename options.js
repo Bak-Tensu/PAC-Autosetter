@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", restoreOptions);
+document.getElementById("mode1").addEventListener("change", onModeChange);
+document.getElementById("mode2").addEventListener("change", onModeChange);
 document.getElementById("save").addEventListener("click", saveOptions);
 document.getElementById("generate-now").addEventListener("click", generatePACInOptions);
 document.getElementById("btn-export").addEventListener("click", exportOptions);
@@ -9,38 +11,89 @@ document.getElementById("file-import").addEventListener("change", importOptions)
 
 // Retrieve config from storage, or assign defaults if not found
 async function restoreOptions() {
-  const { desired_name, domains, auto_mode, last_updated, proxy_list } = await browser.storage.local.get([
+  const { desired_name, domains, auto_mode, last_updated, proxy_list, mode, proxy_direct_host, proxy_direct_port } = await browser.storage.local.get([
     "desired_name",
     "domains",
     "auto_mode",
     "last_updated",
-    "proxy_list"
+    "proxy_list",
+    "mode",
+    "proxy_direct_host",
+    "proxy_direct_port"
   ]);
 
+  const currentMode = mode || "mode1";
+  document.getElementById(currentMode).checked = true;
   document.getElementById("proxListURL").value = proxy_list || "";
   document.getElementById("proxyName").value = desired_name || "";
   document.getElementById("domains").value = (domains || ["whatismyipaddress.com"]).join("\n");
   document.getElementById("autoMode").checked = auto_mode !== false;
+  document.getElementById("proxyHost").value = proxy_direct_host || "";
+  document.getElementById("proxyPort").value = proxy_direct_port || "";
 
-  document.getElementById("currentStatus").textContent = auto_mode === false ? "Manual" : "Automatic";
+  const statusEl = document.getElementById("currentStatus"); // Show current Automatic Mode status based on mode
+  if (mode === "mode2") {
+    statusEl.textContent = "N/A (Direct proxy mode)";
+  } else {
+    statusEl.textContent = auto_mode ? "Automatic" : "Manual";
+  }
+  // document.getElementById("currentStatus").textContent = auto_mode === false ? "Manual" : "Automatic"; // Temporary disabled to reflect Mode 2 case TO DELETE
   document.getElementById("lastUpdated").textContent = last_updated || "Never";
+
+  // Apply UI visibility based on mode
+  applyModeUI(currentMode);
+
+}
+
+// Shows or hide/disable Mode relevant fields
+function onModeChange() {
+  const mode = document.querySelector('input[name="mode"]:checked').value;
+  applyModeUI(mode);
+}
+function applyModeUI(mode) {
+  const mode1Fields = document.getElementById("mode1-fields");
+  const mode2Fields = document.getElementById("mode2-fields");
+  const autoModeCheckbox = document.getElementById("autoMode");
+
+  if (mode === "mode1") {
+    mode1Fields.style.display = "block";
+    mode2Fields.style.display = "none";
+    autoModeCheckbox.disabled = false;
+  } else {
+    mode1Fields.style.display = "none";
+    mode2Fields.style.display = "block";
+    autoModeCheckbox.disabled = true;
+  }
 }
 
 // Store config in storage, then retrieve the status from Auto Mode and shortly display a short confirmation
 async function saveOptions() {
+  const mode = document.querySelector('input[name="mode"]:checked')?.value || "mode1";
   const desired_name = document.getElementById("proxyName").value.trim();
   const domains = document.getElementById("domains").value.split("\n").map(d => d.trim()).filter(Boolean);
   const auto_mode = document.getElementById("autoMode").checked;
   const proxy_list = document.getElementById("proxListURL").value.trim();
+  const proxy_direct_host = document.getElementById("proxyHost").value.trim();
+  // const proxy_direct_port = document.getElementById("proxyPort").value.trim(); Testing storing proxyport as number instead of string
+  const proxy_direct_port = parseInt(document.getElementById("proxyPort").value, 10);
 
   await browser.storage.local.set({
     desired_name,
     domains,
     auto_mode,
-    proxy_list
+    proxy_list,
+    mode,
+    proxy_direct_host,
+    proxy_direct_port
   });
 
-  document.getElementById("currentStatus").textContent = auto_mode ? "Automatic" : "Manual";
+  const statusEl = document.getElementById("currentStatus"); // Show current Automatic Mode status based on mode
+  if (mode === "mode2") {
+    statusEl.textContent = "N/A (Direct proxy mode)";
+  } else {
+    statusEl.textContent = auto_mode ? "Automatic" : "Manual";
+  }
+  // document.getElementById("currentStatus").textContent = auto_mode ? "Automatic" : "Manual"; // Temporary disabled to reflect Mode 2 case TO DELETE
   document.getElementById("status").style.color = "green";
   document.getElementById("status").textContent = "Saved!";
   setTimeout(() => location.reload(), 800);
@@ -76,17 +129,22 @@ async function generatePACInOptions() {
 async function exportOptions() {
   try {
     // Grab everything we care about
-    const { desired_name, domains, auto_mode, proxy_list } = await browser.storage.local.get([
-      "desired_name", "domains", "auto_mode", "proxy_list"
+    const { desired_name, domains, auto_mode, proxy_list, mode, proxy_direct_host, proxy_direct_port } = await browser.storage.local.get([
+      "desired_name", "domains", "auto_mode", "proxy_list", "mode", "proxy_direct_host", "proxy_direct_port"
     ]);
 
     // Build the export object with versioning
     const exportData = {
-      version: 1,
+      version: 2,
       desired_name: desired_name || "",
       domains: domains || [],
       auto_mode: auto_mode !== false,
-      proxy_list: proxy_list || ""
+      proxy_list: proxy_list || "",
+      mode: mode || "mode1",
+      proxy_direct: {
+        host: proxy_direct_host || "",
+        port: proxy_direct_port || ""
+      }
     };
 
     // Convert to pretty JSON
@@ -118,19 +176,22 @@ async function importOptions(event) {
     const text = await file.text();
     const data = JSON.parse(text);
 
-    if (data.version !== 1) {
+    if (data.version !== 2) {
       alert("Unsupported config version: " + data.version);
       return;
     }
 
     // Import config found in the JSON into browser storage
-    const { desired_name, domains, auto_mode, proxy_list } = data;
+    const { desired_name, domains, auto_mode, proxy_list, mode, proxy_direct } = data;
 
     await browser.storage.local.set({
       desired_name,
       domains,
       auto_mode,
-      proxy_list
+      proxy_list,
+      mode: mode || "mode1",
+      proxy_direct_host: proxy_direct?.host || "",
+      proxy_direct_port: proxy_direct?.port || ""
     });
 
     alert("Settings imported successfully!");
