@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
   "name": "Auto PAC Proxy",
-  "version": "1.0.0",
-  "description": "Fetches a proxy by name and sets a PAC script via data URI for specific domains, updating every 30 minutes.",
+  "version": "2.0.0",
+  "description": "Domain-specific URI PAC Script manager. List-and-name based mode or proxy adress based mode.",
   "permissions": [
     "proxy",
     "alarms",
