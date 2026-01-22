@@ -87,25 +87,54 @@
 
   <input type="file" id="file-import" accept=".json" style="display:none;" />
 
-  <label>
-    Proxy List URL:
-    <input type="text" id="proxListURL" />
-  </label>
+  <hr />
+  <div id="mode-selector">
+    <label>
+      <input type="radio" name="mode" id="mode1" value="mode1" checked />
+      Mode 1 — Proxy list & named server
+    </label>
 
-  <label>
-    Desired Proxy Name:
-    <input type="text" id="proxyName" />
-  </label>
+    <label>
+      <input type="radio" name="mode" id="mode2" value="mode2" />
+      Mode 2 — Direct proxy (host & port)
+    </label>
+  </div>
+  <hr />
+
+  <div id="mode1-fields">
+    <label>
+      Proxy List URL:
+      <input type="text" id="proxListURL" />
+    </label>
+
+    <label>
+      Desired Proxy Name:
+      <input type="text" id="proxyName" />
+    </label>
+
+    <label>
+      <input type="checkbox" id="autoMode" />
+      Automatic Mode (refresh every 30 minutes)
+    </label>
+  </div>
+
+  <div id="mode2-fields" style="display:none;">
+    <label>
+      Proxy Host:
+      <input type="text" id="proxyHost" placeholder="e.g. 192.0.2.10" />
+    </label>
+
+    <label>
+      Proxy Port:
+      <input type="number" id="proxyPort" placeholder="e.g. 8080" min="1" max="65535" />
+    </label>
+  </div>
 
   <label>
     Domains to Proxy (one per line):
     <textarea id="domains" rows="6"></textarea>
   </label>
 
-  <label>
-    <input type="checkbox" id="autoMode" />
-    Automatic Mode (refresh every 30 minutes)
-  </label>
 
   <div id="status">
     <strong>Refresh Mode:</strong> <span id="currentStatus">Loading...</span><br>
