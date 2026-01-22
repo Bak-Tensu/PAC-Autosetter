@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.0.0] - 2026-01-23
+### Added
+- Core extension functionality: Second Mode (Mode 2) : Direct Proxy by Host:Port.
+- New fields & buttons in Options for this mode.
+
+### Changed
+- Reorganized some code to target Mode 1 or Mode 2 use.
+
+### Notes
+- Cosmetic improvements needed, but use OK.
 
 
 ## [1.0.0] - 2025-08-23
