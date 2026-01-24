@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1] - 2026-01-25
+### Added
+- Minor UI cosmetic enhancements
+
+### Notes
+- Maybe reorganize code a bit for easier readability later.
+
 ## [2.0.0] - 2026-01-23
 ### Added
 - Core extension functionality: Second Mode (Mode 2) : Direct Proxy by Host:Port.
