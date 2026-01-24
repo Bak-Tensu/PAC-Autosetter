@@ -1,4 +1,15 @@
-document.addEventListener("DOMContentLoaded", restoreOptions);
+document.addEventListener("DOMContentLoaded", restoreOptions); // Load saved config (from storage) when options page is opened
+document.addEventListener("DOMContentLoaded", () => {
+  const ta = document.getElementById("domains");
+  if (!ta) return;
+  const autoResize = () => {
+    ta.style.height = "auto";
+    ta.style.height = ta.scrollHeight + 5 + "px"; // Extra 5px for padding
+  };
+
+  ta.addEventListener("input", autoResize);
+  setTimeout(autoResize, 0); // Ensure it resizes after restoreOptions() fills it
+});
 document.getElementById("mode1").addEventListener("change", onModeChange);
 document.getElementById("mode2").addEventListener("change", onModeChange);
 document.getElementById("save").addEventListener("click", saveOptions);
