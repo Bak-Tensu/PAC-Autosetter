@@ -1,7 +1,16 @@
+// =================================================
+// Constants & Defaults
+// =================================================
 const PROXY_LIST_URL = "";
 const DEFAULT_CONFIG = { desired_name: "" };
 const DEFAULT_DOMAINS = ["whatismyipaddress.com"];
 
+
+// =================================================
+// Helper functions
+// =================================================
+
+// Gets current config from storage, applying defaults if not set.
 async function getConfig() {
   const stored = await browser.storage.local.get(["mode", "desired_name", "domains", "auto_mode", "proxy_list", "proxy_direct_host", "proxy_direct_port" ]);
   return {
@@ -43,6 +52,11 @@ function generatePAC(proxy, domains) {
     return "DIRECT";
   }`;
 }
+
+
+// =================================================
+// Main PAC update logic
+// =================================================
 
 // Main function to update PAC settings based on current Mode
 async function updatePAC() {
@@ -99,6 +113,20 @@ async function updatePAC() {
   }
 }
 
+
+// =================================================
+// Alarms
+// =================================================
+
+// Creating listener to react immediately to either Mode 1/2 OR Automatic mode toggle (after saving changes)
+// Needed to not having to relaunch browser after a change
+browser.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && (changes.auto_mode || changes.mode)) {
+    console.log("Mode (1/2) or Automatic Mode (On/Off) changed, reconfiguring alarms...");
+    setupAlarmBasedOnAutoMode();
+  }
+});
+
 // Setup or clear alarms based on current mode and automatic renewal setting
 async function setupAlarmBasedOnAutoMode() {
   const { mode, auto_mode } = await getConfig();
@@ -116,15 +144,11 @@ browser.alarms.onAlarm.addListener(alarm => {
   }
 });
 
-// Initial setup (Installation, browser startup or enabling). Disregard error if any (eg. first install when no config yet).
-(async function initializeExtension () {
-  try {
-    await updatePAC();
-  } catch (e) {
-    console.warn("Disregard if 1st install or re-enabling. Initial PAC setup skipped:", e.message);
-  }
-  await setupAlarmBasedOnAutoMode();
-})();
+
+// =================================================
+// UI & Menus
+// =================================================
+
 // Manual PAC update trigger from the Toolbar Icon
 browser.browserAction.onClicked.addListener(() => {
   console.log("Updating PAC from the Toolbar Icon...");
@@ -140,11 +164,18 @@ browser.menus.create({
     },
 });
 
-// Creating listener to react immediately to either Mode 1/2 OR Automatic mode toggle (after saving changes)
-// Needed to not having to relaunch browser after a change
-browser.storage.onChanged.addListener((changes, area) => {
-  if (area === "local" && (changes.auto_mode || changes.mode)) {
-    console.log("Mode (1/2) or Automatic Mode (On/Off) changed, reconfiguring alarms...");
-    setupAlarmBasedOnAutoMode();
+
+// =================================================
+// Initialization
+// =================================================
+
+// Initial setup (Installation, browser startup or enabling). Disregard error if any (eg. first install when no config yet).
+// Note : Function is async, but gets launched without awaiting it because there are () at the end.
+(async function initializeExtension () {
+  try {
+    await updatePAC();
+  } catch (e) {
+    console.warn("Disregard above error if 1st install or re-enabling. Initial PAC setup skipped:", e.message);
   }
-});
+  await setupAlarmBasedOnAutoMode();
+})();

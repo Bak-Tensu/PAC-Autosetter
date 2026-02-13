@@ -1,3 +1,7 @@
+// =================================================
+// Event Listeners
+// =================================================
+
 document.addEventListener("DOMContentLoaded", restoreOptions); // Load saved config (from storage) when options page is opened
 document.addEventListener("DOMContentLoaded", () => {
   const ta = document.getElementById("domains");
@@ -15,11 +19,41 @@ document.getElementById("btn-import").addEventListener("click", () => {
 document.getElementById("file-import").addEventListener("change", importOptions);
 
 
+// =================================================
+// Cosmetic & UI
+// =================================================
+
 // Auto-resizes the text area based on content. Called on input and after restoring options to fit the saved domains list.
 function autoResizeTextArea(ta) {
   ta.style.height = "auto";
   ta.style.height = ta.scrollHeight + 5 + "px"; // Extra 5px for padding
 }
+
+// Shows or hide/disable Mode relevant fields
+function onModeChange() {
+  const mode = document.querySelector('input[name="mode"]:checked').value;
+  applyModeUI(mode);
+}
+function applyModeUI(mode) {
+  const mode1Fields = document.getElementById("mode1-fields");
+  const mode2Fields = document.getElementById("mode2-fields");
+  const autoModeCheckbox = document.getElementById("autoMode");
+
+  if (mode === "mode1") {
+    mode1Fields.style.display = "block";
+    mode2Fields.style.display = "none";
+    autoModeCheckbox.disabled = false;
+  } else {
+    mode1Fields.style.display = "none";
+    mode2Fields.style.display = "block";
+    autoModeCheckbox.disabled = true;
+  }
+}
+
+
+// =================================================
+// Storage logic & management
+// =================================================
 
 // Retrieve config from storage, or assign defaults if not found
 async function restoreOptions() {
@@ -55,25 +89,6 @@ async function restoreOptions() {
   applyModeUI(currentMode); // Apply UI visibility based on mode
   autoResizeTextArea(ta); // Resize "Domains" text area to fit content
 
-// Shows or hide/disable Mode relevant fields
-function onModeChange() {
-  const mode = document.querySelector('input[name="mode"]:checked').value;
-  applyModeUI(mode);
-}
-function applyModeUI(mode) {
-  const mode1Fields = document.getElementById("mode1-fields");
-  const mode2Fields = document.getElementById("mode2-fields");
-  const autoModeCheckbox = document.getElementById("autoMode");
-
-  if (mode === "mode1") {
-    mode1Fields.style.display = "block";
-    mode2Fields.style.display = "none";
-    autoModeCheckbox.disabled = false;
-  } else {
-    mode1Fields.style.display = "none";
-    mode2Fields.style.display = "block";
-    autoModeCheckbox.disabled = true;
-  }
 }
 
 // Store config in storage, then retrieve the status from Auto Mode and shortly display a short confirmation
@@ -107,6 +122,11 @@ async function saveOptions() {
   setTimeout(() => location.reload(), 800);
 }
 
+
+// =================================================
+// PAC generation from Options Page
+// =================================================
+
 // Manually create a PAC URI
 async function generatePACInOptions() {
   const statusDiv = document.getElementById("manualUpdateFeedback");
@@ -126,22 +146,27 @@ async function generatePACInOptions() {
     alert("Failed to regenerate PAC. See console for details.");
   }
 
-  // Fade out after 5 seconds then reload to update the page's state
-  setTimeout(() => {
+  // We clear the status after 5 seconds then immediately reload to update the status' state
+  setTimeout(() => { 
     statusDiv.textContent = "";
     location.reload();
   }, 5000);
 };
 
+
+// =================================================
+// Importing / Exporting config
+// =================================================
+
 // Export config in a local file
 async function exportOptions() {
   try {
-    // Grab everything we care about
+    // First we grab everything we care about
     const { desired_name, domains, auto_mode, proxy_list, mode, proxy_direct_host, proxy_direct_port } = await browser.storage.local.get([
       "desired_name", "domains", "auto_mode", "proxy_list", "mode", "proxy_direct_host", "proxy_direct_port"
     ]);
 
-    // Build the export object with versioning
+    // Then we build the export object with versioning
     const exportData = {
       version: 2,
       desired_name: desired_name || "",
@@ -155,11 +180,11 @@ async function exportOptions() {
       }
     };
 
-    // Convert to pretty JSON
+    // Then we convert to pretty JSON
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
 
-    // Trigger download
+    // Finally we trigger download
     const a = document.createElement("a");
     a.href = url;
     a.download = "PAC-extension-config.json"; // Rename as you like
