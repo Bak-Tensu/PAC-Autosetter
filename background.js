@@ -108,9 +108,6 @@ async function setupAlarmBasedOnAutoMode() {
   }
 }
 
-// Manual trigger
-browser.browserAction.onClicked.addListener(updatePAC);  
-
 // Periodic PAC update if Alarm "auto-pac" is set (ie. Mode 1 + Automatic mode enabled)
 browser.alarms.onAlarm.addListener(alarm => {
   if (alarm.name === "auto-pac") {
@@ -128,6 +125,11 @@ browser.alarms.onAlarm.addListener(alarm => {
   }
   await setupAlarmBasedOnAutoMode();
 })();
+// Manual PAC update trigger from the Toolbar Icon
+browser.browserAction.onClicked.addListener(() => {
+  console.log("Updating PAC from the Toolbar Icon...");
+  updatePAC();
+});
 
 // Create the "Options" menu when right-clicking on the Toolbar Icon.
 browser.menus.create({
