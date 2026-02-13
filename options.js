@@ -2,13 +2,7 @@ document.addEventListener("DOMContentLoaded", restoreOptions); // Load saved con
 document.addEventListener("DOMContentLoaded", () => {
   const ta = document.getElementById("domains");
   if (!ta) return;
-  const autoResize = () => {
-    ta.style.height = "auto";
-    ta.style.height = ta.scrollHeight + 5 + "px"; // Extra 5px for padding
-  };
-
-  ta.addEventListener("input", autoResize);
-  setTimeout(autoResize, 0); // Ensure it resizes after restoreOptions() fills it
+  ta.addEventListener("input", () => autoResizeTextArea(ta)); //Auto-resize the "Domains" text area as user types
 });
 document.getElementById("mode1").addEventListener("change", onModeChange);
 document.getElementById("mode2").addEventListener("change", onModeChange);
@@ -19,6 +13,13 @@ document.getElementById("btn-import").addEventListener("click", () => {
   document.getElementById("file-import").click();
 });
 document.getElementById("file-import").addEventListener("change", importOptions);
+
+
+// Auto-resizes the text area based on content. Called on input and after restoring options to fit the saved domains list.
+function autoResizeTextArea(ta) {
+  ta.style.height = "auto";
+  ta.style.height = ta.scrollHeight + 5 + "px"; // Extra 5px for padding
+}
 
 // Retrieve config from storage, or assign defaults if not found
 async function restoreOptions() {
@@ -37,7 +38,8 @@ async function restoreOptions() {
   document.getElementById(currentMode).checked = true;
   document.getElementById("proxListURL").value = proxy_list || "";
   document.getElementById("proxyName").value = desired_name || "";
-  document.getElementById("domains").value = (domains || ["whatismyipaddress.com"]).join("\n");
+  const ta = document.getElementById("domains") ;
+  ta.value = (domains || ["whatismyipaddress.com"]).join("\n"); // Split into 2 lines because "ta" needs to be defined for autoResizeTextArea after.
   document.getElementById("autoMode").checked = auto_mode !== false;
   document.getElementById("proxyHost").value = proxy_direct_host || "";
   document.getElementById("proxyPort").value = proxy_direct_port || "";
@@ -50,10 +52,8 @@ async function restoreOptions() {
   }
   document.getElementById("lastUpdated").textContent = last_updated || "Never";
 
-  // Apply UI visibility based on mode
-  applyModeUI(currentMode);
-
-}
+  applyModeUI(currentMode); // Apply UI visibility based on mode
+  autoResizeTextArea(ta); // Resize "Domains" text area to fit content
 
 // Shows or hide/disable Mode relevant fields
 function onModeChange() {
