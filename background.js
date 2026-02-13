@@ -12,7 +12,7 @@ async function getConfig() {
     proxy_list: stored.proxy_list || PROXY_LIST_URL,
     auto_mode: stored.auto_mode !== false, // defaults to true
 
-    // Mode 2: Second mode with direct proxy settings (not yet implemented)
+    // Mode 2: Second mode with direct proxy settings (host + port)
     proxy_direct_host: stored.proxy_direct_host || "",
     proxy_direct_port: stored.proxy_direct_port || "",
 
@@ -111,7 +111,7 @@ async function setupAlarmBasedOnAutoMode() {
 // Manual trigger
 browser.browserAction.onClicked.addListener(updatePAC);  
 
-// Handle periodic update
+// Periodic PAC update if Alarm "auto-pac" is set (ie. Mode 1 + Automatic mode enabled)
 browser.alarms.onAlarm.addListener(alarm => {
   if (alarm.name === "auto-pac") {
     console.log("Ding! 30 minutes passed. Updating PAC in 10 seconds.");
