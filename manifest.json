@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Auto PAC Proxy",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Domain-specific URI PAC Script manager. List-and-name based mode or proxy adress based mode.",
   "permissions": [
     "proxy",
