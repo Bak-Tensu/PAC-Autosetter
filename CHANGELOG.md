@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.1.1] - 2026-02-14
+### Added
+- Domains counter.
+- Checks whether a valid config exists before trying to initialize extension.
+
+### Changed
+- Minor UX Cosmetic enhancements
+- Chore : Reorganize code a bit for easier readability.
+
+### Notes
+- Extension essentially stable as of now. Further changes should be tweaks.
+
 ## [2.0.1] - 2026-01-25
 ### Added
 - Minor UI cosmetic enhancements
