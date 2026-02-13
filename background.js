@@ -169,13 +169,30 @@ browser.menus.create({
 // Initialization
 // =================================================
 
-// Initial setup (Installation, browser startup or enabling). Disregard error if any (eg. first install when no config yet).
+// Initial setup (on installation, browser startup or enabling). Skip at first install or when no config yet.
 // Note : Function is async, but gets launched without awaiting it because there are () at the end.
 (async function initializeExtension () {
-  try {
-    await updatePAC();
-  } catch (e) {
-    console.warn("Disregard above error if 1st install or re-enabling. Initial PAC setup skipped:", e.message);
+  const config = await getConfig();
+
+  const hasMode1Config =
+    config.mode === "mode1" &&
+    config.proxy_list &&
+    config.desired_name;
+
+  const hasMode2Config =
+    config.mode === "mode2" &&
+    config.proxy_direct_host &&
+    config.proxy_direct_port;
+
+  if (hasMode1Config || hasMode2Config) {
+    try {
+      await updatePAC();
+    } catch (e) {
+      console.warn("Initial PAC setup failed:", e.message);
+    }
+  } else {
+    console.log("Initial PAC setup skipped: no valid proxy configuration yet.");
   }
+
   await setupAlarmBasedOnAutoMode();
 })();
