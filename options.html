@@ -32,6 +32,11 @@
       font-size: 0.9em;
       color: #555;
     }
+    .domainCount {
+      margin-top: 2px;
+      font-size: 0.8em;
+      color: #666;
+    }
     .action-buttons {
       display: flex;
       justify-content: space-between;
@@ -147,6 +152,9 @@
     <textarea id="domains" rows="6"></textarea>
   </label>
 
+  <div class="domainCount">
+    Domains: <span id="domainCountNumber">0</span>
+  </div>
 
   <div id="status">
     <strong>Refresh Mode:</strong> <span id="currentStatus">Loading...</span><br>

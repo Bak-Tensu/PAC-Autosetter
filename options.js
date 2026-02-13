@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!ta) return;
   ta.addEventListener("input", () => autoResizeTextArea(ta)); //Auto-resize the "Domains" text area as user types
 });
+document.getElementById("domains").addEventListener("input", updateDomainCount);
 document.getElementById("mode1").addEventListener("change", onModeChange);
 document.getElementById("mode2").addEventListener("change", onModeChange);
 document.getElementById("save").addEventListener("click", saveOptions);
@@ -50,6 +51,17 @@ function applyModeUI(mode) {
   }
 }
 
+// Updates the displayed count of domains as user types in the "Domains to Proxy" text area or when options are restored.
+function updateDomainCount() {
+  const domains = document.getElementById("domains").value
+    .split("\n")
+    .map(d => d.trim())
+    .filter(Boolean);
+
+  document.getElementById("domainCountNumber").textContent =
+    domains.length;
+}
+
 
 // =================================================
 // Storage logic & management
@@ -87,7 +99,8 @@ async function restoreOptions() {
   document.getElementById("lastUpdated").textContent = last_updated || "Never";
 
   applyModeUI(currentMode); // Apply UI visibility based on mode
-  autoResizeTextArea(ta); // Resize "Domains" text area to fit content
+  autoResizeTextArea(ta); // Resize "Domains to Proxy" text area to fit content
+  updateDomainCount(); // Update domain count display
 
 }
 
