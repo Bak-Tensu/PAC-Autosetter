@@ -48,7 +48,6 @@ async function restoreOptions() {
   } else {
     statusEl.textContent = auto_mode ? "Automatic" : "Manual";
   }
-  // document.getElementById("currentStatus").textContent = auto_mode === false ? "Manual" : "Automatic"; // Temporary disabled to reflect Mode 2 case TO DELETE
   document.getElementById("lastUpdated").textContent = last_updated || "Never";
 
   // Apply UI visibility based on mode
@@ -85,8 +84,7 @@ async function saveOptions() {
   const auto_mode = document.getElementById("autoMode").checked;
   const proxy_list = document.getElementById("proxListURL").value.trim();
   const proxy_direct_host = document.getElementById("proxyHost").value.trim();
-  // const proxy_direct_port = document.getElementById("proxyPort").value.trim(); Testing storing proxyport as number instead of string
-  const proxy_direct_port = parseInt(document.getElementById("proxyPort").value, 10);
+  const proxy_direct_port = parseInt(document.getElementById("proxyPort").value, 10); 
 
   await browser.storage.local.set({
     desired_name,
@@ -104,7 +102,6 @@ async function saveOptions() {
   } else {
     statusEl.textContent = auto_mode ? "Automatic" : "Manual";
   }
-  // document.getElementById("currentStatus").textContent = auto_mode ? "Automatic" : "Manual"; // Temporary disabled to reflect Mode 2 case TO DELETE
   document.getElementById("status").style.color = "green";
   document.getElementById("status").textContent = "Saved!";
   setTimeout(() => location.reload(), 800);
